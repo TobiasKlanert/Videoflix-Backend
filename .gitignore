@@ -1,0 +1,65 @@
+# Python
+__pycache__/
+*.py[cod]
+*.sqlite3
+*.log
+*.pot
+*.pyc
+*.pyo
+*.pyd
+
+# Django
+db.sqlite3
+/media
+/staticfiles
+*.log
+*.sqlite3
+
+# Env / Secrets
+.env
+.env.*
+*.secret
+*.token
+
+# VSCode / Editor
+.vscode/
+.idea/
+*.swp
+
+# Virtual Envs
+venv/
+env/
+ENV/
+
+# Migrations
+**/migrations/*.pyc
+**/migrations/__pycache__/
+
+# --- Environment / Secrets ---
+.env
+.env.*
+!env.template
+
+# --- Virtual Environment ---
+env/
+venv/
+.venv/
+
+# --- Docker ---
+*.env
+docker-compose.override.yml
+
+# --- OS / Editor ---
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# --- Test / Coverage ---
+.coverage
+htmlcov/
+.pytest_cache/
+
+# --- Node ---
+node_modules/
