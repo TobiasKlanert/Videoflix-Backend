@@ -18,6 +18,7 @@ db.sqlite3
 # Env / Secrets
 .env
 .env.*
+!.env.template
 *.secret
 *.token
 
@@ -34,16 +35,6 @@ ENV/
 # Migrations
 **/migrations/*.pyc
 **/migrations/__pycache__/
-
-# --- Environment / Secrets ---
-.env
-.env.*
-!env.template
-
-# --- Virtual Environment ---
-env/
-venv/
-.venv/
 
 # --- Docker ---
 *.env
