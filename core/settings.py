@@ -11,9 +11,10 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+from dotenv import load_dotenv
+from datetime import timedelta
 
 import os
-from dotenv import load_dotenv
 
 load_dotenv()
 
@@ -35,6 +36,19 @@ DEBUG = os.getenv('DEBUG', default=True)
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", default="localhost").split(",")
 CSRF_TRUSTED_ORIGINS = os.environ.get(
     "CSRF_TRUSTED_ORIGINS", default="http://localhost:4200").split(",")
+
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = os.getenv('EMAIL_HOST', default='smtp.example.com')
+EMAIL_PORT = os.getenv('EMAIL_PORT', default=587)
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', default='no-reply@example.com')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', default='yourpassword')
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', default=True)
+EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL', default=False)
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', default='Videoflix <no-reply@example.com>')
+
+FRONTEND_ACTIVATION_URL = os.getenv('FRONTEND_ACTIVATION_URL', default='http://127.0.0.1:5500/pages/auth/activate.html')
+ACTIVATION_TOKEN_MAX_AGE_SECONDS = 60 * 60 * 24  # 24h
 
 
 # Application definition
@@ -83,8 +97,10 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'core.wsgi.application'
 
+
 def show_toolbar(request):
     return True
+
 
 DEBUG_TOOLBAR_CONFIG = {
     'SHOW_TOOLBAR_CALLBACK': show_toolbar,
@@ -156,6 +172,17 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
+}
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+}
 
 
 # Internationalization
