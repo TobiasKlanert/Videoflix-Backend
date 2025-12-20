@@ -1,7 +1,10 @@
 from django.urls import path
-from .views import RegisterView, ActivateAccountView
+from .views import RegisterView, ActivateAccountView, CookieTokenObtainPairView, LogoutCookieView, CookieRefreshView
 
 urlpatterns = [
     path("register/", RegisterView.as_view(), name="register"),
     path("activate/<uidb64>/<token>/", ActivateAccountView.as_view(), name="activate"),
+    path("login/", CookieTokenObtainPairView.as_view(), name="login"),
+    path("logout/", LogoutCookieView.as_view(), name="logout"),
+    path("token/refresh/", CookieRefreshView.as_view(), name="refresh") 
 ]
