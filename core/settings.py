@@ -38,14 +38,18 @@ CSRF_TRUSTED_ORIGINS = os.environ.get(
     "CSRF_TRUSTED_ORIGINS", default="http://localhost:4200").split(",")
 
 
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+if DEBUG:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+else:
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+
 EMAIL_HOST = os.getenv('EMAIL_HOST', default='smtp.example.com')
 EMAIL_PORT = os.getenv('EMAIL_PORT', default=587)
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', default='no-reply@example.com')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', default='yourpassword')
 EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', default=True)
 EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL', default=False)
-DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', default='Videoflix <no-reply@example.com>')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', default='Videoflix <noreply@videoflix.local>')
 
 FRONTEND_ACTIVATION_URL = os.getenv('FRONTEND_ACTIVATION_URL', default='http://127.0.0.1:5500/pages/auth/activate.html')
 ACTIVATION_TOKEN_MAX_AGE_SECONDS = 60 * 60 * 24  # 24h
@@ -63,11 +67,13 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_rq',
     'content_app.apps.ContentConfig',
-    'debug_toolbar'
+    'debug_toolbar',
+    'corsheaders'
 ]
 
 MIDDLEWARE = [
     'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -183,6 +189,24 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
 }
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:4200",
+    "http://127.0.0.1:4200",
+    "http://localhost:5500",
+    "http://127.0.0.1:5500",
+]
+
+CORS_ALLOW_CREDENTIALS = True
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:4200",
+    "http://127.0.0.1:4200",
+    "http://localhost:5500",
+]
+
 
 
 # Internationalization
