@@ -13,7 +13,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import RegisterSerializer, CustomTokenObtainPairSerializer
 
 from auth_app.services.mailer import send_activation_email, send_password_reset_email
-from auth_app.utils.activation import activate_user
+from auth_app.utils.activation import activate_user, password_reset_token, sanitize_uid, sanitize_token, decode_uid
 
 User = get_user_model()
 
@@ -173,5 +173,51 @@ class PasswordResetRequestView(APIView):
 
         return Response(
             {"detail": "An email has been sent to reset your password."},
+            status=status.HTTP_200_OK,
+        )
+
+
+class PasswordResetConfirmView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request, uidb64, token):
+        uidb64 = sanitize_uid(uidb64)
+        token = sanitize_token(token)
+
+        new_password = (request.data.get("new_password") or "").strip()
+        confirm_password = (request.data.get("confirm_password") or "").strip()
+
+        if not new_password or not confirm_password:
+            return Response(
+                {"detail": "New password and confirmation are required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if new_password != confirm_password:
+            return Response(
+                {"detail": "Passwords do not match."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            user_id = decode_uid(uidb64)
+            user = User.objects.get(pk=user_id)
+        except Exception:
+            return Response(
+                {"detail": "Invalid reset link."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not password_reset_token.check_token(user, token):
+            return Response(
+                {"detail": "Invalid or expired token."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user.set_password(new_password)
+        user.save(update_fields=["password"])
+
+        return Response(
+            {"detail": "Your Password has been successfully reset."},
             status=status.HTTP_200_OK,
         )
