@@ -12,6 +12,7 @@ from django.utils.http import (
 
 ACTIVATION_SALT = "account-activation"
 account_activation_token = PasswordResetTokenGenerator()
+password_reset_token = PasswordResetTokenGenerator()
 _UID_RE = re.compile(r"[^A-Za-z0-9_-]")
 _TOKEN_RE = re.compile(r"[^A-Za-z0-9-]")
 

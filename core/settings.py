@@ -52,7 +52,9 @@ EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL', default=False)
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', default='Videoflix <noreply@videoflix.local>')
 
 FRONTEND_ACTIVATION_URL = os.getenv('FRONTEND_ACTIVATION_URL', default='http://127.0.0.1:5500/pages/auth/activate.html')
+FRONTEND_PASSWORD_RESET_URL = os.getenv('FRONTEND_PASSWORD_RESET_URL', default='http://127.0.0.1:5500/pages/auth/confirm_password.html')
 ACTIVATION_TOKEN_MAX_AGE_SECONDS = 60 * 60 * 24  # 24h
+PASSWORD_RESET_TIMEOUT = 60 * 60 * 24  # 24h
 
 
 # Application definition

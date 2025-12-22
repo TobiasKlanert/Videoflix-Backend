@@ -12,7 +12,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from .serializers import RegisterSerializer, CustomTokenObtainPairSerializer
 
-from auth_app.services.mailer import send_activation_email
+from auth_app.services.mailer import send_activation_email, send_password_reset_email
 from auth_app.utils.activation import activate_user
 
 User = get_user_model()
@@ -149,3 +149,29 @@ class CookieRefreshView(TokenRefreshView):
         )
 
         return response
+
+
+class PasswordResetRequestView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        email = (request.data.get("email") or "").strip()
+        if not email:
+            return Response(
+                {"detail": "Email is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user = User.objects.filter(email__iexact=email).first()
+        if not user:
+            return Response(
+                {"detail": "No account found with this email."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        send_password_reset_email(user, request=request)
+
+        return Response(
+            {"detail": "An email has been sent to reset your password."},
+            status=status.HTTP_200_OK,
+        )
