@@ -8,3 +8,4 @@ class VideoAdmin(admin.ModelAdmin):
     list_display = ("title", "category", "created_at")
     list_filter = ("category", "created_at")
     search_fields = ("title", "description", "category")
+    readonly_fields = ("thumbnail_url",)

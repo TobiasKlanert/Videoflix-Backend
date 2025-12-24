@@ -1,12 +1,37 @@
 import subprocess
 import os
 
+from django.conf import settings
+
+from .models import Video
+
 
 def convert_hls(source):
     has_audio = _has_audio(source)
     output_dir = _prepare_hls_dirs(source)
     cmd = _build_hls_cmd(source, output_dir, has_audio)
     _run_ffmpeg(cmd)
+
+
+def extract_thumbnail(video_id, source):
+    output_path = _thumbnail_output_path(source)
+    cmd = [
+        "ffmpeg",
+        "-y",
+        "-ss",
+        "00:00:01",
+        "-i",
+        source,
+        "-frames:v",
+        "1",
+        "-q:v",
+        "2",
+        output_path,
+    ]
+    _run_ffmpeg(cmd)
+    Video.objects.filter(pk=video_id).update(
+        thumbnail_url=_thumbnail_url(output_path)
+    )
 
 
 def _has_audio(source):
@@ -113,3 +138,19 @@ def _run_ffmpeg(cmd):
         raise RuntimeError(
             f"ffmpeg failed with code {result.returncode}: {result.stderr.strip()}"
         )
+
+
+def _thumbnail_output_path(source):
+    base_name = os.path.splitext(os.path.basename(source))[0]
+    output_dir = os.path.join(os.fspath(settings.MEDIA_ROOT), "thumbnail")
+    os.makedirs(output_dir, exist_ok=True)
+    return os.path.join(output_dir, f"{base_name}.jpg")
+
+
+def _thumbnail_url(output_path):
+    relative_path = os.path.relpath(
+        output_path, os.fspath(settings.MEDIA_ROOT)
+    ).replace("\\", "/")
+    media_url = settings.MEDIA_URL.lstrip("/")
+    base_url = settings.MEDIA_BASE_URL.rstrip("/")
+    return f"{base_url}/{media_url}{relative_path}"
