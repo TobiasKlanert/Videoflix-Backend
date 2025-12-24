@@ -1,8 +1,10 @@
 import subprocess
+import os
 
 
 def convert_480p(source):
-    new_file = source + '_480p.mp4'
+    filename, file_extension = os.path.splitext(source)
+    new_file = filename + '_480p' + file_extension
     cmd = [
         "ffmpeg",
         "-i",
