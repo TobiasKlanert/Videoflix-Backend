@@ -18,6 +18,9 @@ import os
 
 load_dotenv()
 
+def _env_bool(name, default=False):
+    return os.getenv(name, str(default)).strip().lower() in ("1", "true", "yes")
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -31,11 +34,12 @@ SECRET_KEY = os.getenv(
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', default=True)
+DEBUG = _env_bool("DEBUG", True)
 
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", default="localhost").split(",")
 CSRF_TRUSTED_ORIGINS = os.environ.get(
     "CSRF_TRUSTED_ORIGINS", default="http://localhost:4200").split(",")
+
 
 
 if DEBUG:
@@ -47,8 +51,8 @@ EMAIL_HOST = os.getenv('EMAIL_HOST', default='smtp.example.com')
 EMAIL_PORT = os.getenv('EMAIL_PORT', default=587)
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', default='no-reply@example.com')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', default='yourpassword')
-EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', default=True)
-EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL', default=False)
+EMAIL_USE_TLS = _env_bool("EMAIL_USE_TLS", True)
+EMAIL_USE_SSL = _env_bool("EMAIL_USE_SSL", False)
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', default='Videoflix <noreply@videoflix.local>')
 
 FRONTEND_ACTIVATION_URL = os.getenv('FRONTEND_ACTIVATION_URL', default='http://127.0.0.1:5500/pages/auth/activate.html')
