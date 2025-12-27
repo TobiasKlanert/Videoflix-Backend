@@ -1,7 +1,31 @@
-﻿from django.conf import settings
+from email.mime.image import MIMEImage
+from pathlib import Path
+
+from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 
-from auth_app.utils.activation import account_activation_token, password_reset_token, encode_uid
+from auth_app.utils.activation import (
+    account_activation_token,
+    encode_uid,
+    password_reset_token,
+)
+
+LOGO_CID = "videoflix_logo"
+
+
+def _logo_path():
+    return Path(settings.BASE_DIR) / "static" / "assets" / "logo_icon.png"
+
+
+def _attach_logo(email):
+    path = _logo_path()
+    if not path.exists():
+        return
+    with path.open("rb") as handle:
+        image = MIMEImage(handle.read())
+    image.add_header("Content-ID", f"<{LOGO_CID}>")
+    image.add_header("Content-Disposition", "inline", filename=path.name)
+    email.attach(image)
 
 
 def send_activation_email(user, request=None):
@@ -29,6 +53,9 @@ def send_activation_email(user, request=None):
         "Your Videoflix Team."
     )
     html_message = f"""\
+<p style="text-align:center;">
+  <img src="cid:{LOGO_CID}" alt="Videoflix" width="120" style="display:block;margin:0 auto;">
+</p>
 <p>Dear {display_name},</p>
 <p>Thank you for registering with Videoflix. To complete your registration and verify your email address, please click the button below:</p>
 <p>
@@ -46,6 +73,7 @@ def send_activation_email(user, request=None):
         from_email=settings.DEFAULT_FROM_EMAIL,
         to=[user.email],
     )
+    _attach_logo(email)
     email.attach_alternative(html_message, "text/html")
     email.send()
 
@@ -88,6 +116,7 @@ def send_password_reset_email(user, request=None):
 <p>Please note that for security reasons, this link is only valid for 24 hours.</p>
 <p>If you did not request a password reset, please ignore this email.</p>
 <p>Best regards,<br>Your Videoflix Team.</p>
+<p><img src="cid:{LOGO_CID}" alt="Videoflix" width="120"></p>
 """
 
     email = EmailMultiAlternatives(
@@ -96,5 +125,6 @@ def send_password_reset_email(user, request=None):
         from_email=settings.DEFAULT_FROM_EMAIL,
         to=[user.email],
     )
+    _attach_logo(email)
     email.attach_alternative(html_message, "text/html")
     email.send()
