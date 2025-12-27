@@ -13,14 +13,16 @@ done
 
 echo "PostgreSQL ist bereit - fahre fort..."
 
-# Deine originalen Befehle (ohne wait_for_db)
-python manage.py collectstatic --noinput
-python manage.py makemigrations
-python manage.py migrate
+# Run migrations only for the web container to avoid concurrent schema setup.
+if [ "${RUN_MIGRATIONS:-1}" = "1" ]; then
+  python manage.py collectstatic --noinput
+  python manage.py makemigrations
+  python manage.py migrate
+fi
 
-# Create a superuser using environment variables
-# (Dein Superuser-Erstellungs-Code bleibt gleich)
-python manage.py shell <<EOF
+# Create a superuser only when migrations are enabled.
+if [ "${RUN_MIGRATIONS:-1}" = "1" ]; then
+  python manage.py shell <<EOF
 import os
 from django.contrib.auth import get_user_model
 
@@ -37,6 +39,7 @@ if not User.objects.filter(username=username).exists():
 else:
     print(f"Superuser '{username}' already exists.")
 EOF
+fi
 
 if [ "$#" -gt 0 ]; then
   exec "$@"
