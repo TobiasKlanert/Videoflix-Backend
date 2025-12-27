@@ -55,7 +55,7 @@ class VideoListAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
-        videos = Video.objects.all()
+        videos = Video.objects.all().order_by('-created_at')
         serializer = VideoSerializer(videos, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
