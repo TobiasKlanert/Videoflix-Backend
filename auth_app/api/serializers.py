@@ -8,6 +8,38 @@ User = get_user_model()
 
 
 class RegisterSerializer(serializers.ModelSerializer):
+    """
+    Serializer for registering a new user.
+
+    This ModelSerializer accepts an email, password and confirmed_password and is
+    responsible for validating the input and creating a new inactive User instance.
+
+    Behavior
+    - Fields:
+        - email: the user's email address (from User model).
+        - password: write-only password field.
+        - confirmed_password: write-only field used to confirm the password.
+    - Validation:
+        - Ensures password and confirmed_password match.
+        - Ensures the provided email is not already associated with an existing user.
+        - On failure raises serializers.ValidationError with field-specific messages.
+    - Creation:
+        - Removes confirmed_password from validated data.
+        - Extracts and hashes password with set_password().
+        - If the User model uses a "username" USERNAME_FIELD and exposes a username
+            attribute, generates a unique username derived from the email local part.
+        - Marks the created user as inactive (is_active = False) and saves to DB.
+        - Returns the created User instance.
+
+    Helper
+    - _generate_username(email):
+        - Produces a URL-safe (slugified) base from the email local-part or "user".
+        - Appends a numeric suffix if needed to avoid username collisions.
+
+    Side effects
+    - Persists a new User in the database with is_active=False.
+    - May raise serializers.ValidationError during validation.
+    """
     confirmed_password = serializers.CharField(write_only=True)
 
     class Meta:
@@ -52,6 +84,20 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    """
+    Serializer that issues JWT refresh and access tokens using an email credential.
+
+    This class customizes TokenObtainPairSerializer to use "email" as the username_field
+    and overrides validate(...) to perform authentication via a case-insensitive email
+    lookup. validate expects attrs to contain "email" and "password"; it raises
+    serializers.ValidationError if either is missing, if the credentials are invalid,
+    or if the account is not active.
+
+    On successful authentication, validate returns a dict containing:
+    - "refresh": str(refresh token)
+    - "access": str(access token)
+    - "user": {"id": <user id>, "username": <user email>}
+    """
     username_field = "email"
 
     def validate(self, attrs):

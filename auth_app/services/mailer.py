@@ -14,10 +14,47 @@ LOGO_CID = "videoflix_logo"
 
 
 def _logo_path():
+    """
+    Return the filesystem path to the application's logo icon.
+
+    Constructs and returns a pathlib.Path pointing to "static/assets/logo_icon.png"
+    located under settings.BASE_DIR.
+
+    Returns:
+        pathlib.Path: Path to the logo_icon.png file.
+
+    Notes:
+        - The function does not check whether the file exists; callers should
+          verify existence if required.
+        - Relies on settings.BASE_DIR being a valid base directory (typically a str or Path).
+    """
     return Path(settings.BASE_DIR) / "static" / "assets" / "logo_icon.png"
 
 
 def _attach_logo(email):
+    """Attach the application logo image to the provided email message as an inline MIME image.
+
+    Parameters:
+    email : email.message.EmailMessage (or compatible)
+        The email message object to which the logo will be attached. The object must support
+        an attach() method that accepts a MIME part.
+
+    Behavior:
+    - Resolves the logo file location via the module helper _logo_path().
+    - If the resolved path does not exist, the function returns immediately without modifying
+      the email.
+    - If the file exists, it is opened in binary mode, wrapped in a MIMEImage, and the MIME
+      headers are set:
+        - Content-ID is set to the module-level LOGO_CID (wrapped in angle brackets).
+        - Content-Disposition is set to "inline" with the original filename.
+    - The MIMEImage part is attached to the provided email message.
+
+    Returns:
+    None
+
+    Notes:
+    Relies on module-level identifiers/functions: _logo_path() and LOGO_CID.
+    """
     path = _logo_path()
     if not path.exists():
         return
@@ -29,6 +66,37 @@ def _attach_logo(email):
 
 
 def send_activation_email(user, request=None):
+    """
+    Send an account activation email to a user.
+
+    Parameters:
+    user : object
+        User instance with attributes:
+        - id (used for UID encoding)
+        - email (recipient address)
+        - optional get_username() method (used for display name if present)
+    request : django.http.HttpRequest or None, optional
+        If provided, request.build_absolute_uri(settings.FRONTEND_ACTIVATION_URL)
+        is used to construct an absolute activation URL; otherwise
+        settings.FRONTEND_ACTIVATION_URL is used directly.
+
+    Behavior:
+    - Encodes the user's id and generates an activation token.
+    - Builds an activation URL containing 'uid' and 'token' query parameters.
+    - Composes both plain-text and HTML email bodies; the HTML includes an
+      inline-logo referenced by a content ID and a call-to-action button linking
+      to the activation URL.
+    - Attaches the logo to the email and sends a multipart (text + HTML) email
+      from settings.DEFAULT_FROM_EMAIL to the user's email address.
+
+    Returns:
+    None
+
+    Raises:
+    Any exceptions raised by UID/token generation, URL building, email
+    construction/attachment, or sending (e.g., AttributeError, SMTP-related
+    exceptions) may be propagated to the caller.
+    """
     uid = encode_uid(user.id)
     token = account_activation_token.make_token(user)
 
@@ -79,6 +147,41 @@ def send_activation_email(user, request=None):
 
 
 def send_password_reset_email(user, request=None):
+    """
+    Send a password-reset email to a user.
+
+    Parameters:
+    user : object
+        User-like object providing at minimum:
+        - id: used to generate an encoded UID for the reset link.
+        - email: recipient address.
+        - get_username() (optional): used as display name when present.
+    request : django.http.HttpRequest, optional
+        If provided, used to build an absolute frontend reset URL via
+        request.build_absolute_uri(settings.FRONTEND_PASSWORD_RESET_URL).
+        If omitted, settings.FRONTEND_PASSWORD_RESET_URL is used directly.
+
+    Behavior:
+    - Generates a UID and password reset token.
+    - Builds a frontend reset URL with query parameters ?uid=<uid>&token=<token>.
+    - Composes a plain-text and HTML multipart email (HTML includes a CTA button and
+      an inline logo referenced by a content ID).
+    - Attaches the logo and sends the email via Django's EmailMultiAlternatives.
+
+    Returns:
+    None
+
+    Raises:
+    AttributeError
+        If required attributes (e.g., id or email) are missing on the user object.
+    django.core.mail.MailException or smtplib.SMTPException
+        If sending the email fails.
+
+    Notes:
+    - Relies on settings.FRONTEND_PASSWORD_RESET_URL and settings.DEFAULT_FROM_EMAIL.
+    - Token lifetime is enforced by the token generator, not by this function.
+    - This function has the side effect of sending an email and does not persist any state.
+    """
     uid = encode_uid(user.id)
     token = password_reset_token.make_token(user)
 
