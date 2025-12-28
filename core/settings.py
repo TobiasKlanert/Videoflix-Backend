@@ -42,10 +42,7 @@ CSRF_TRUSTED_ORIGINS = os.environ.get(
 
 
 
-if DEBUG:
-    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-else:
-    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
 EMAIL_HOST = os.getenv('EMAIL_HOST', default='smtp.example.com')
 EMAIL_PORT = os.getenv('EMAIL_PORT', default=587)
