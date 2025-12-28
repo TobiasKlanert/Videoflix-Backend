@@ -1,6 +1,6 @@
 # Videoflix Backend
 
-Backend service for Videoflix. Runs a Django app with PostgreSQL and Redis via Docker Compose.
+Backend service to host a video streaming platform. Provides user authentication, video management, and HLS video streaming, powered by Django, PostgreSQL, and Redis via Docker Compose.
 
 ## Features
 
