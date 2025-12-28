@@ -41,6 +41,7 @@ class RegisterView(APIView):
     - The exact request schema and required fields are defined by RegisterSerializer.
     - Other exceptions follow DRF's default error handling and may produce appropriate HTTP error responses.
     """
+    authentication_classes = []
     permission_classes = [AllowAny]
 
     def post(self, request):
@@ -85,6 +86,7 @@ class ActivateAccountView(APIView):
     - The request object is accepted to match the DRF view signature but is not directly used by the method.
     - The returned user value from activate_user is not used beyond activation success handling.
     """
+    authentication_classes = []
     permission_classes = [AllowAny]
 
     def get(self, request, uidb64, token):
@@ -129,6 +131,7 @@ class CookieTokenObtainPairView(TokenObtainPairView):
     - Propagates authentication/validation errors raised by the parent implementation.
     """
     serializer_class = CustomTokenObtainPairSerializer
+    authentication_classes = []
 
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
@@ -231,6 +234,7 @@ class CookieRefreshView(TokenRefreshView):
     - Relies on the serializer returned by self.get_serializer to perform standard token refresh validation
         (expected to provide 'access' in validated_data on success).
     """
+    authentication_classes = []
 
     def post(self, request, *args, **kwargs):
         refresh_token = request.COOKIES.get('refresh_token')
@@ -292,6 +296,7 @@ class PasswordResetRequestView(APIView):
     - This endpoint reveals whether an account exists for the provided email (returns 404 for non-existent emails).
     - Side effect: triggers sending of a password reset email via the send_password_reset_email utility.
     """
+    authentication_classes = []
     permission_classes = [AllowAny]
 
     def post(self, request):
@@ -351,6 +356,7 @@ class PasswordResetConfirmView(APIView):
     - All inputs are sanitized before use (sanitize_uid, sanitize_token).
     - Errors are handled by returning appropriate HTTP responses; no exceptions are propagated to the caller.
     """
+    authentication_classes = []
     permission_classes = [AllowAny]
 
     def post(self, request, uidb64, token):
