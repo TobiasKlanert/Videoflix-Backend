@@ -86,6 +86,7 @@ On first start, the entrypoint will:
 5) Open the app
 
 - Backend API: `http://localhost:8000`
+- Videos can be uploaded via the Django admin panel (`http://localhost:8000/admin`) after the containers are running (requires a staff user).
 
 ## Useful Commands
 
