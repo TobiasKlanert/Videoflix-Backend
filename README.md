@@ -34,14 +34,15 @@ The stack is configured via a `.env` file. Use the template provided:
 
 Copy it to `.env` and fill in the values. Required fields include:
 
+- `DJANGO_SUPERUSER_USERNAME`, `DJANGO_SUPERUSER_PASSWORD`, `DJANGO_SUPERUSER_EMAIL`
 - `SECRET_KEY`
 - `DEBUG`
 - `ALLOWED_HOSTS`
 - `CSRF_TRUSTED_ORIGINS`
 - `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT`
 - `REDIS_HOST`, `REDIS_LOCATION`, `REDIS_PORT`, `REDIS_DB`
-- `DJANGO_SUPERUSER_USERNAME`, `DJANGO_SUPERUSER_PASSWORD`, `DJANGO_SUPERUSER_EMAIL`
-- Email settings and frontend URLs if you use those features
+- `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`, `DEFAULT_FROM_EMAIL`    
+- **Email host settings are required in `.env`; without them, email delivery fails and user registration is not possible**
 
 ## Configuration Notes
 
@@ -67,7 +68,7 @@ copy .env.template .env
 
 3) Edit `.env` and set real values
 
-Make sure at least the database credentials and `SECRET_KEY` are set.
+Make sure at least the database and email credentials and `SECRET_KEY` are set.
 
 4) Build and start the containers
 
