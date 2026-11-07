@@ -1,5 +1,9 @@
 # Videoflix Backend
 
+> **Course project.** Developed as part of the Developer Akademie GmbH advanced training program. The frontend, and with it the API it expects, was provided by Developer Akademie and is not part of this repository. The Docker setup and the base configuration in `core/settings.py` follow a [template by Developer Akademie](https://github.com/Developer-Akademie-Backendkurs/material.videoflix-docker-files), see [Docker setup and template](#docker-setup-and-template). The backend implementation is my own work.
+>
+> The Docker setup is intended for local development, not for production. This project is not deployed.
+
 Backend service to host a video streaming platform. Provides user authentication, video management, and HLS video streaming, powered by Django, PostgreSQL, and Redis via Docker Compose.
 
 ## Features
@@ -23,6 +27,18 @@ Backend service to host a video streaming platform. Provides user authentication
 - `worker` container: RQ worker
 - `db` container: PostgreSQL
 - `redis` container: Redis
+
+## Docker setup and template
+
+The Docker files are based on the [Developer Akademie template](https://github.com/Developer-Akademie-Backendkurs/material.videoflix-docker-files). `.dockerignore` and `backend.Dockerfile` are unchanged.
+
+My changes:
+
+- `docker-compose.yml`: a separate `worker` container for the RQ worker. In the template, the worker ran as a background process inside the `web` container.
+- `backend.entrypoint.sh`: a `RUN_MIGRATIONS` switch, so that `collectstatic`, migrations and superuser creation run only in the `web` container and not in parallel in the worker. Containers can be started with their own command (`exec "$@"`), which the worker uses.
+- `.env.template`: no hardcoded `SECRET_KEY`, `DEBUG=False` by default, plus variables for Redis credentials, the frontend URLs for account activation and password reset, and `MEDIA_BASE_URL`.
+
+Kept from the template, suitable for local development but not for production: Gunicorn with `--reload`, the published port `8000`, unpinned `postgres:latest` and `redis:latest` images, and `makemigrations` on every start of the `web` container.
 
 ## Environment Configuration
 
